@@ -3,14 +3,14 @@ import { Circle, Layer, Line, Stage } from "react-konva"
 import produce from "immer"
 import "./App.css"
 import { dist } from "./math"
-import { entries } from "./utils"
+import { entries, newEntries } from "./utils"
 import Link from "./figures/Link"
 import Node from "./figures/Node"
 
 class App extends Component {
   state = {
-    nodes: { byId: {}, allIds: [] },
-    links: { byId: {}, allIds: [] },
+    nodes: newEntries(),
+    links: newEntries(),
     frontier: []
   }
 
@@ -21,7 +21,7 @@ class App extends Component {
 
   generateNodes(size, dist) {
     return new Promise((resolve, reject) => {
-      let nodes = { byId: {}, allIds: [] }
+      let nodes = newEntries()
 
       const addNode = (i, node) => {
         nodes.byId[i] = node
@@ -44,7 +44,7 @@ class App extends Component {
   generateLinks(maxDist) {
     const { nodes } = this.state
 
-    let links = { byId: {}, allIds: [] }
+    let links = newEntries()
 
     const addLink = (i, l) => {
       links.byId[i] = l
