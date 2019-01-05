@@ -5,6 +5,7 @@
   "dependencies": {
     "immer": "^1.10.0",
     "konva": "^2.6.0",
+    "lodash": "^4.17.11",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-konva": "^16.7.1",

@@ -1,17 +1,21 @@
-import React, { Component, Fragment } from "react"
-import { Circle, Layer, Line, Stage } from "react-konva"
 import produce from "immer"
+import React, { Component } from "react"
+import { Arrow, Layer, Stage } from "react-konva"
+import { createPathFinder, h } from "./algo/createPathFinder"
+import FIFO from "./algo/queues/FIFO"
 import "./App.css"
-import { dist } from "./math"
-import { entries, newEntries } from "./utils"
 import Link from "./figures/Link"
 import Node from "./figures/Node"
+import { dist } from "./math"
+import { entries, newEntries } from "./utils"
 
 class App extends Component {
   state = {
     nodes: newEntries(),
     links: newEntries(),
-    frontier: []
+    pathSteps: null,
+    step: 0,
+    hasDonePath: false
   }
 
   async componentDidMount() {
@@ -24,7 +28,7 @@ class App extends Component {
       let nodes = newEntries()
 
       const addNode = (i, node) => {
-        nodes.byId[i] = node
+        nodes.byId[i] = { ...node, neighbors: [] }
         nodes.allIds.push(i)
       }
 
@@ -42,8 +46,11 @@ class App extends Component {
   }
 
   generateLinks(maxDist) {
-    const { nodes } = this.state
-
+    // return new Promise((resolve, reject) => {
+    // this.setState(
+    // produce(this.state, state => {
+    // console.log(JSON.stringify(state))
+    const nodes = JSON.parse(JSON.stringify(this.state.nodes))
     let links = newEntries()
 
     const addLink = (i, l) => {
@@ -53,20 +60,28 @@ class App extends Component {
 
     let index = 0
     for (let i = 0; i < nodes.allIds.length; i++) {
-      for (let j = i; j < nodes.allIds.length; j++) {
+      for (let j = i + 1; j < nodes.allIds.length; j++) {
         const a = nodes.byId[i]
         const b = nodes.byId[j]
 
         if (dist(a, b) < maxDist) {
-          addLink(index++, { from: i, to: j })
+          nodes.byId[i].neighbors.push(j)
+          nodes.byId[j].neighbors.push(i)
+          addLink(index, { from: i, to: j })
+
+          index++
         }
       }
     }
 
-    this.setState({ links })
+    this.setState({ nodes, links })
+    // }),
+    // () => resolve()
+    // )
+    // })
   }
 
-  test = () => {
+  moveNode = () => {
     this.setState(
       produce(this.state, state => {
         state.nodes.byId[1].x += 2
@@ -75,13 +90,44 @@ class App extends Component {
     )
   }
 
+  test = () => {
+    const pf = createPathFinder(new FIFO(), h)
+    const findPath = pf(this.state.nodes, this.state.links)
+    this.setState({ pathSteps: [] }, () => {
+      for (let pathStep of findPath(35, 0)) {
+        console.log(pathStep)
+        this.setState(
+          produce(state => {
+            state.pathSteps.push(pathStep)
+            // state.step = state.pathSteps.length - 1
+          })
+        )
+      }
+      this.setState({ hasDonePath: true })
+    })
+  }
+
   render() {
-    const { nodes, links } = this.state
-    console.log("App.render()")
+    const { nodes, links, pathSteps, step, hasDonePath } = this.state
+
+    const pathState = //use memoize-one
+      hasDonePath && pathSteps.length > step ? pathSteps[step] : {}
 
     return (
       <div>
         <button onClick={this.test}>TEST </button>{" "}
+        {hasDonePath && (
+          <input
+            style={{ width: "400px" }}
+            type="range"
+            min={0}
+            max={pathSteps.length - 1}
+            value={step}
+            step={1}
+            onInput={e => this.setState({ step: e.target.value })}
+            onChange={e => this.setState({ step: e.target.value })}
+          />
+        )}
         <Stage width={window.innerWidth} height={window.innerHeight}>
           <Layer>
             {entries(links).map(([i, l]) => (
@@ -92,8 +138,30 @@ class App extends Component {
             {nodes.allIds
               .map(id => [id, nodes.byId[id]])
               .map(([i, n]) => (
-                <Node key={i} {...n} name={i} />
+                <Node key={i} {...n} name={`${i}`} />
               ))}
+          </Layer>
+          <Layer>
+            {hasDonePath &&
+              Object.entries(pathState.cameFrom)
+                .filter(([a, b]) => b != null)
+                .map(([toId, fromId]) => {
+                  const from = nodes.byId[fromId]
+                  const to = nodes.byId[toId]
+                  return (
+                    <Arrow
+                      key={toId}
+                      x={from.x}
+                      y={from.y}
+                      points={[0, 0, to.x - from.x, to.y - from.y]}
+                      pointerLength={20}
+                      pointerWidth={20}
+                      fill={"black"}
+                      stroke={"black"}
+                      strokeWidth={4}
+                    />
+                  )
+                })}
           </Layer>
         </Stage>
       </div>

@@ -1,6 +1,5 @@
-export default class PriorityQueue {
-  constructor(compare = (a, b) => a - b, getId = a => a) {
-    this.compare = compare
+export default class FIFO {
+  constructor(getId = a => a) {
     this.getId = getId
     this.items = []
   }
@@ -18,7 +17,6 @@ export default class PriorityQueue {
 
   add = item => {
     this.items.push(item)
-    this.items.sort(this.compare)
   }
 
   /**
