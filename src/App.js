@@ -134,13 +134,7 @@ class App extends Component {
               <Link key={i} from={nodes.byId[l.from]} to={nodes.byId[l.to]} />
             ))}
           </Layer>
-          <Layer>
-            {nodes.allIds
-              .map(id => [id, nodes.byId[id]])
-              .map(([i, n]) => (
-                <Node key={i} {...n} name={`${i}`} />
-              ))}
-          </Layer>
+
           <Layer>
             {hasDonePath &&
               Object.entries(pathState.cameFrom)
@@ -153,15 +147,27 @@ class App extends Component {
                       key={toId}
                       x={from.x}
                       y={from.y}
-                      points={[0, 0, to.x - from.x, to.y - from.y]}
+                      points={[
+                        0,
+                        0,
+                        ((to.x - from.x) * 2) / 3,
+                        ((to.y - from.y) * 2) / 3
+                      ]}
                       pointerLength={20}
                       pointerWidth={20}
-                      fill={"black"}
-                      stroke={"black"}
+                      fill={"gray"}
+                      stroke={"gray"}
                       strokeWidth={4}
                     />
                   )
                 })}
+          </Layer>
+          <Layer>
+            {nodes.allIds
+              .map(id => [id, nodes.byId[id]])
+              .map(([i, n]) => (
+                <Node key={i} {...n} name={`${i}`} />
+              ))}
           </Layer>
         </Stage>
       </div>
