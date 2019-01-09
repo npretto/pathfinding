@@ -1,13 +1,18 @@
 import produce from "immer"
 import React, { Component } from "react"
 import { Arrow, Layer, Stage } from "react-konva"
-import { createPathFinder, h } from "./algo/createPathFinder"
+import {
+  createPathFinder,
+  hDist,
+  eucledianDistance
+} from "./algo/createPathFinder"
 import FIFO from "./algo/queues/FIFO"
 import "./App.css"
 import Link from "./figures/Link"
 import Node from "./figures/Node"
 import { dist } from "./math"
 import { entries, newEntries } from "./utils"
+import PriorityQueue from "./algo/queues/PriorityQueue"
 
 class App extends Component {
   state = {
@@ -91,7 +96,10 @@ class App extends Component {
   }
 
   test = () => {
-    const pf = createPathFinder(new FIFO(), h)
+    // const pf = createPathFinder(new FIFO()) //BFS
+    // const pf = createPathFinder(new PriorityQueue(), () => 0) // djstra
+    const pf = createPathFinder(new PriorityQueue(), eucledianDistance) //a*
+
     const findPath = pf(this.state.nodes, this.state.links)
     this.setState({ pathSteps: [] }, () => {
       for (let pathStep of findPath(35, 0)) {
@@ -110,8 +118,13 @@ class App extends Component {
   render() {
     const { nodes, links, pathSteps, step, hasDonePath } = this.state
 
-    const pathState = //use memoize-one
+    const pathState =
       hasDonePath && pathSteps.length > step ? pathSteps[step] : {}
+    console.log("nodes", nodes)
+    console.log("current PathState", pathState)
+    if (hasDonePath) {
+      console.log("current PathState.frontier.items", pathState.frontier.items)
+    }
 
     return (
       <div>
@@ -142,6 +155,11 @@ class App extends Component {
                 .map(([toId, fromId]) => {
                   const from = nodes.byId[fromId]
                   const to = nodes.byId[toId]
+                  const isInPath =
+                    pathState.path != null &&
+                    pathState.path.includes(parseInt(toId)) &&
+                    pathState.path.includes(parseInt(fromId))
+
                   return (
                     <Arrow
                       key={toId}
@@ -155,8 +173,8 @@ class App extends Component {
                       ]}
                       pointerLength={20}
                       pointerWidth={20}
-                      fill={"gray"}
-                      stroke={"gray"}
+                      fill={isInPath ? "black" : "gray"}
+                      stroke={isInPath ? "black" : "gray"}
                       strokeWidth={4}
                     />
                   )
@@ -166,7 +184,22 @@ class App extends Component {
             {nodes.allIds
               .map(id => [id, nodes.byId[id]])
               .map(([i, n]) => (
-                <Node key={i} {...n} name={`${i}`} />
+                <Node
+                  key={i}
+                  {...n}
+                  name={`${i}`}
+                  inFrontier={
+                    hasDonePath &&
+                    pathState.frontier.items.find(a => a.id === i)
+                      ? true
+                      : false
+                    // pathState.frontier.contains({ id: i })
+                  }
+                  visited={
+                    hasDonePath && //Object.values(pathState.cameFrom).includes(i)
+                    (pathState.cameFrom[i] || pathState.cameFrom[i] === null)
+                  }
+                />
               ))}
           </Layer>
         </Stage>

@@ -1,5 +1,5 @@
 export default class FIFO {
-  constructor(getId = a => a) {
+  constructor(getId = a => a.id) {
     this.getId = getId
     this.items = []
   }
@@ -16,7 +16,7 @@ export default class FIFO {
   }
 
   add = item => {
-    this.items.push(item)
+    if (!this.contains(item)) this.items.push(item)
   }
 
   /**

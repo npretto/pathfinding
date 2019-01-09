@@ -1,5 +1,5 @@
 export default class PriorityQueue {
-  constructor(compare = (a, b) => a - b, getId = a => a) {
+  constructor(compare = (a, b) => a.cost - b.cost, getId = a => a.id) {
     this.compare = compare
     this.getId = getId
     this.items = []
@@ -11,14 +11,25 @@ export default class PriorityQueue {
     return this.size() === 0
   }
 
-  contains = item => {
-    const id = this.getId(item)
-    return this.items.find(i => this.getId(i) === id) ? true : false
+  containsId = id => {
+    return this.items.find(i => {
+      return this.getId(i) === id
+    })
+      ? true
+      : false
   }
 
+  contains = item => this.containsId(this.getId(item))
+
   add = item => {
-    this.items.push(item)
-    this.items.sort(this.compare)
+    if (!this.contains(item)) {
+      this.items.push(item)
+      this.items.sort(this.compare)
+    } else {
+      const index = this.items.findIndex(i => this.getId(i) == this.getId(item))
+      this.items[index] = item
+      this.items.sort(this.compare)
+    }
   }
 
   /**
