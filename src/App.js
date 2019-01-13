@@ -6,6 +6,7 @@ import "./App.css"
 import { dist } from "./math"
 import { newEntries } from "./utils"
 import MyCanvas from "./components/MyCanvas"
+import FIFO from "./algo/queues/FIFO"
 
 class App extends Component {
   state = {
@@ -13,7 +14,9 @@ class App extends Component {
     links: newEntries(),
     pathSteps: null,
     step: 0,
-    hasDonePath: false
+    hasDonePath: false,
+    queue: "fifo",
+    heuristic: "omogeneus"
   }
 
   async componentDidMount() {
@@ -79,32 +82,32 @@ class App extends Component {
     // })
   }
 
-  moveNode = () => {
-    this.setState(
-      produce(this.state, state => {
-        state.nodes.byId[1].x += 2
-        state.nodes.byId[1].y += 1
-      })
-    )
-  }
-
   test = () => {
     // const pf = createPathFinder(new FIFO()) //BFS
     // const pf = createPathFinder(new PriorityQueue(), () => 0) // djstra
-    const pf = createPathFinder(new PriorityQueue(), eucledianDistance) //a*
+    // const pf = createPathFinder(new PriorityQueue(), eucledianDistance) //a*
+
+    const queue = this.state.queue == "fifo" ? new FIFO() : new PriorityQueue()
+    const heuristic =
+      this.state.heuristic == "omogeneus" ? () => 0 : eucledianDistance
+
+    const pf = createPathFinder(queue, heuristic)
 
     const findPath = pf(this.state.nodes, this.state.links)
-    this.setState({ pathSteps: [] }, () => {
+    this.setState({ pathSteps: [], step: 0, hasDonePath: false }, () => {
       for (let pathStep of findPath(35, 0)) {
         console.log(pathStep)
         this.setState(
           produce(state => {
             state.pathSteps.push(pathStep)
-            // state.step = state.pathSteps.length - 1
-          })
+            if (pathStep.path != null && state.step === 0)
+              state.step = state.pathSteps.length - 1
+          }),
+          () => {
+            this.setState({ hasDonePath: true })
+          }
         )
       }
-      this.setState({ hasDonePath: true })
     })
   }
 
@@ -112,21 +115,59 @@ class App extends Component {
     const { pathSteps, step, hasDonePath } = this.state
 
     return (
-      <div>
-        <button onClick={this.test}>TEST </button>{" "}
-        {hasDonePath && (
-          <input
-            style={{ width: "400px" }}
-            type="range"
-            min={0}
-            max={pathSteps.length - 1}
-            value={step}
-            step={1}
-            onInput={e => this.setState({ step: e.target.value })}
-            onChange={e => this.setState({ step: e.target.value })}
-          />
-        )}
-        <MyCanvas {...this.state} />
+      <div className="mainContainer">
+        <div className="left">
+          <div className="top">
+            <button onClick={this.test}> TEST </button>{" "}
+            {hasDonePath && (
+              <input
+                style={{ width: "400px" }}
+                type="range"
+                min={0}
+                max={pathSteps.length - 1}
+                value={step}
+                step={1}
+                onInput={e => this.setState({ step: e.target.value })}
+                onChange={e => this.setState({ step: e.target.value })}
+              />
+            )}
+          </div>
+          <div className="canvasContainer">
+            <MyCanvas {...this.state} />
+          </div>
+        </div>
+        <div className="optionsPanel">
+          options
+          <br />
+          <br />
+          <label>
+            Queue:
+            <br />
+            <select
+              value={this.state.queue}
+              onChange={e => this.setState({ queue: e.target.value })}
+            >
+              <option value="fifo">First In First Out</option>
+              <option value="priority">Priority Queue</option>
+            </select>
+          </label>
+          <br />
+          <br />
+          <label>
+            Heuristic:
+            <br />
+            <select
+              value={this.state.heuristic}
+              onChange={e => {
+                console.log(e, e.target.value)
+                this.setState({ heuristic: e.target.value })
+              }}
+            >
+              <option value="omogeneus">h(x) = 1</option>
+              <option value="euclidean">Eucledian Distance</option>
+            </select>
+          </label>
+        </div>
       </div>
     )
   }

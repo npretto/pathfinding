@@ -30,3 +30,42 @@
     transform: rotate(360deg);
   }
 }
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+div {
+  /* border: 1px solid yellow; */
+}
+
+.mainContainer {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.left {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+}
+
+.top {
+  flex: 1 0 50px;
+  background: lightgray;
+}
+
+.canvasContainer {
+  flex: 1;
+  /* background: red; */
+  height: 100%;
+}
+
+.optionsPanel {
+  flex: 1;
+  background: lightgreen;
+  width: 400px;
+}

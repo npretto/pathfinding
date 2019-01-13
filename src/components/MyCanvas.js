@@ -16,7 +16,7 @@ export default class MyCanvas extends Component {
       console.log("current PathState.frontier.items", pathState.frontier.items)
     }
     return (
-      <Stage width={window.innerWidth} height={window.innerHeight}>
+      <Stage width={800} height={800}>
         <Layer>
           {entries(links).map(([i, l]) => (
             <Link key={i} from={nodes.byId[l.from]} to={nodes.byId[l.to]} />
