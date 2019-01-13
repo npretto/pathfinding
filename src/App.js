@@ -87,9 +87,9 @@ class App extends Component {
     // const pf = createPathFinder(new PriorityQueue(), () => 0) // djstra
     // const pf = createPathFinder(new PriorityQueue(), eucledianDistance) //a*
 
-    const queue = this.state.queue == "fifo" ? new FIFO() : new PriorityQueue()
+    const queue = this.state.queue === "fifo" ? new FIFO() : new PriorityQueue()
     const heuristic =
-      this.state.heuristic == "omogeneus" ? () => 0 : eucledianDistance
+      this.state.heuristic === "omogeneus" ? () => 0 : eucledianDistance
 
     const pf = createPathFinder(queue, heuristic)
 
@@ -112,7 +112,14 @@ class App extends Component {
   }
 
   render() {
-    const { pathSteps, step, hasDonePath } = this.state
+    const { pathSteps, step, hasDonePath, heuristic, queue } = this.state
+
+    const algoName =
+      queue === "fifo"
+        ? "Breadth-first search"
+        : heuristic === "omogeneus"
+        ? "Djstra"
+        : "A*"
 
     return (
       <div className="mainContainer">
@@ -167,6 +174,8 @@ class App extends Component {
               <option value="euclidean">Eucledian Distance</option>
             </select>
           </label>
+          <br />
+          <p> This looks like : {algoName}</p>
         </div>
       </div>
     )
