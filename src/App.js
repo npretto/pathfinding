@@ -21,7 +21,9 @@ class App extends Component {
 
   async componentDidMount() {
     await this.generateNodes(8, 70)
-    this.generateLinks(100)
+    await this.generateLinks(100)
+
+    this.test()
   }
 
   generateNodes(size, dist) {
@@ -47,39 +49,36 @@ class App extends Component {
   }
 
   generateLinks(maxDist) {
-    // return new Promise((resolve, reject) => {
-    // this.setState(
-    // produce(this.state, state => {
-    // console.log(JSON.stringify(state))
-    const nodes = JSON.parse(JSON.stringify(this.state.nodes))
-    let links = newEntries()
+    return new Promise((resolve, reject) => {
+      // this.setState(
+      // produce(this.state, state => {
+      // console.log(JSON.stringify(state))
+      const nodes = JSON.parse(JSON.stringify(this.state.nodes)) //grrr
+      let links = newEntries()
 
-    const addLink = (i, l) => {
-      links.byId[i] = l
-      links.allIds.push(i)
-    }
+      const addLink = (i, l) => {
+        links.byId[i] = l
+        links.allIds.push(i)
+      }
 
-    let index = 0
-    for (let i = 0; i < nodes.allIds.length; i++) {
-      for (let j = i + 1; j < nodes.allIds.length; j++) {
-        const a = nodes.byId[i]
-        const b = nodes.byId[j]
+      let index = 0
+      for (let i = 0; i < nodes.allIds.length; i++) {
+        for (let j = i + 1; j < nodes.allIds.length; j++) {
+          const a = nodes.byId[i]
+          const b = nodes.byId[j]
 
-        if (dist(a, b) < maxDist) {
-          nodes.byId[i].neighbors.push(j)
-          nodes.byId[j].neighbors.push(i)
-          addLink(index, { from: i, to: j })
+          if (dist(a, b) < maxDist) {
+            nodes.byId[i].neighbors.push(j)
+            nodes.byId[j].neighbors.push(i)
+            addLink(index, { from: i, to: j })
 
-          index++
+            index++
+          }
         }
       }
-    }
 
-    this.setState({ nodes, links })
-    // }),
-    // () => resolve()
-    // )
-    // })
+      this.setState({ nodes, links }, () => resolve())
+    })
   }
 
   test = () => {
@@ -93,10 +92,13 @@ class App extends Component {
 
     const pf = createPathFinder(queue, heuristic)
 
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    console.log("pf with", queue, heuristic)
+
     const findPath = pf(this.state.nodes, this.state.links)
     this.setState({ pathSteps: [], step: 0, hasDonePath: false }, () => {
-      for (let pathStep of findPath(35, 0)) {
-        console.log(pathStep)
+      for (let pathStep of findPath(51, 0)) {
+        // console.log(pathStep)
         this.setState(
           produce(state => {
             state.pathSteps.push(pathStep)
@@ -118,14 +120,14 @@ class App extends Component {
       queue === "fifo"
         ? "Breadth-first search"
         : heuristic === "omogeneus"
-        ? "Djstra"
+        ? "Dijkstra"
         : "A*"
 
     return (
       <div className="mainContainer">
         <div className="left">
           <div className="top">
-            <button onClick={this.test}> TEST </button>{" "}
+            <button onClick={this.test}> TEST </button>
             {hasDonePath && (
               <input
                 style={{ width: "400px" }}
@@ -135,9 +137,12 @@ class App extends Component {
                 value={step}
                 step={1}
                 onInput={e => this.setState({ step: e.target.value })}
-                onChange={e => this.setState({ step: e.target.value })}
+                onChange={e => {
+                  this.setState({ step: e.target.value })
+                }}
               />
             )}
+            {hasDonePath && `${step}/${pathSteps.length}`}
           </div>
           <div className="canvasContainer">
             <MyCanvas {...this.state} />
@@ -151,8 +156,10 @@ class App extends Component {
             Queue:
             <br />
             <select
-              value={this.state.queue}
-              onChange={e => this.setState({ queue: e.target.value })}
+              value={queue}
+              onChange={e => {
+                this.setState({ queue: e.target.value }, () => this.test())
+              }}
             >
               <option value="fifo">First In First Out</option>
               <option value="priority">Priority Queue</option>
@@ -164,10 +171,11 @@ class App extends Component {
             Heuristic:
             <br />
             <select
-              value={this.state.heuristic}
+              disabled={queue === "fifo"}
+              value={heuristic}
               onChange={e => {
                 console.log(e, e.target.value)
-                this.setState({ heuristic: e.target.value })
+                this.setState({ heuristic: e.target.value }, () => this.test())
               }}
             >
               <option value="omogeneus">h(x) = 1</option>
@@ -175,7 +183,9 @@ class App extends Component {
             </select>
           </label>
           <br />
-          <p> This looks like : {algoName}</p>
+          <p>
+            This looks like : <strong>{algoName}</strong>
+          </p>
         </div>
       </div>
     )
