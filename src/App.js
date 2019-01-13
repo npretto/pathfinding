@@ -1,18 +1,11 @@
 import produce from "immer"
 import React, { Component } from "react"
-import { Arrow, Layer, Stage } from "react-konva"
-import {
-  createPathFinder,
-  hDist,
-  eucledianDistance
-} from "./algo/createPathFinder"
-import FIFO from "./algo/queues/FIFO"
-import "./App.css"
-import Link from "./figures/Link"
-import Node from "./figures/Node"
-import { dist } from "./math"
-import { entries, newEntries } from "./utils"
+import { createPathFinder, eucledianDistance } from "./algo/createPathFinder"
 import PriorityQueue from "./algo/queues/PriorityQueue"
+import "./App.css"
+import { dist } from "./math"
+import { newEntries } from "./utils"
+import MyCanvas from "./components/MyCanvas"
 
 class App extends Component {
   state = {
@@ -116,15 +109,7 @@ class App extends Component {
   }
 
   render() {
-    const { nodes, links, pathSteps, step, hasDonePath } = this.state
-
-    const pathState =
-      hasDonePath && pathSteps.length > step ? pathSteps[step] : {}
-    console.log("nodes", nodes)
-    console.log("current PathState", pathState)
-    if (hasDonePath) {
-      console.log("current PathState.frontier.items", pathState.frontier.items)
-    }
+    const { pathSteps, step, hasDonePath } = this.state
 
     return (
       <div>
@@ -141,68 +126,7 @@ class App extends Component {
             onChange={e => this.setState({ step: e.target.value })}
           />
         )}
-        <Stage width={window.innerWidth} height={window.innerHeight}>
-          <Layer>
-            {entries(links).map(([i, l]) => (
-              <Link key={i} from={nodes.byId[l.from]} to={nodes.byId[l.to]} />
-            ))}
-          </Layer>
-
-          <Layer>
-            {hasDonePath &&
-              Object.entries(pathState.cameFrom)
-                .filter(([a, b]) => b != null)
-                .map(([toId, fromId]) => {
-                  const from = nodes.byId[fromId]
-                  const to = nodes.byId[toId]
-                  const isInPath =
-                    pathState.path != null &&
-                    pathState.path.includes(parseInt(toId)) &&
-                    pathState.path.includes(parseInt(fromId))
-
-                  return (
-                    <Arrow
-                      key={toId}
-                      x={from.x}
-                      y={from.y}
-                      points={[
-                        0,
-                        0,
-                        ((to.x - from.x) * 2) / 3,
-                        ((to.y - from.y) * 2) / 3
-                      ]}
-                      pointerLength={20}
-                      pointerWidth={20}
-                      fill={isInPath ? "black" : "gray"}
-                      stroke={isInPath ? "black" : "gray"}
-                      strokeWidth={4}
-                    />
-                  )
-                })}
-          </Layer>
-          <Layer>
-            {nodes.allIds
-              .map(id => [id, nodes.byId[id]])
-              .map(([i, n]) => (
-                <Node
-                  key={i}
-                  {...n}
-                  name={`${i}`}
-                  inFrontier={
-                    hasDonePath &&
-                    pathState.frontier.items.find(a => a.id === i)
-                      ? true
-                      : false
-                    // pathState.frontier.contains({ id: i })
-                  }
-                  visited={
-                    hasDonePath && //Object.values(pathState.cameFrom).includes(i)
-                    (pathState.cameFrom[i] || pathState.cameFrom[i] === null)
-                  }
-                />
-              ))}
-          </Layer>
-        </Stage>
+        <MyCanvas {...this.state} />
       </div>
     )
   }
