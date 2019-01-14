@@ -178,7 +178,7 @@ class App extends Component {
                 this.setState({ heuristic: e.target.value }, () => this.test())
               }}
             >
-              <option value="omogeneus">h(x) = 1</option>
+              <option value="omogeneus">h(x) = k</option>
               <option value="euclidean">Eucledian Distance</option>
             </select>
           </label>

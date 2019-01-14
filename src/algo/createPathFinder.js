@@ -22,13 +22,7 @@ export const createPathFinder = (queue, heuristic = (from, to) => 1) => (
     while (!frontier.isEmpty()) {
       const current = frontier.getNext()
 
-      // console.log("current", current)
-      // console.log("nodes.byId[current]", nodes.byId[current])
-      // console.log("cameFrom", cameFrom)
-
       for (let next of nodes.byId[current.id].neighbors) {
-        // console.log("next", next)
-        // console.log("Object.keys(cameFrom)", Object.keys(cameFrom))
         const cost =
           costsSoFar[current.id] +
           dist(nodes.byId[current.id], nodes.byId[next])
@@ -39,12 +33,7 @@ export const createPathFinder = (queue, heuristic = (from, to) => 1) => (
         ) {
           //node not yet seen
           costsSoFar[next] = cost
-          // console.log(
-          //   "adding ",
-          //   next,
-          //   " with cost ",
-          //   cost + heuristic(nodes.byId[next], nodes.byId[goal])
-          // )
+
           frontier.add({
             id: next,
             cost: cost + heuristic(nodes.byId[next], nodes.byId[goal])
@@ -58,7 +47,6 @@ export const createPathFinder = (queue, heuristic = (from, to) => 1) => (
               const prev = cameFrom[node]
               path.push(prev)
               node = prev
-              // console.log(prev, node)
             }
           }
         }
