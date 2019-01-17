@@ -163,10 +163,11 @@ class App extends Component {
       <div className="mainContainer">
         <div className="left">
           <div className="top">
-            <button onClick={this.test}> TEST </button>
+            {/* <button onClick={this.test}> TEST </button> */}
+            <label>Step: </label>
             {hasDonePath && (
               <input
-                style={{ width: "400px" }}
+                style={{ width: "800px" }}
                 type="range"
                 min={0}
                 max={pathSteps.length - 1}
@@ -178,7 +179,7 @@ class App extends Component {
                 }}
               />
             )}
-            {hasDonePath && `${step}/${pathSteps.length}`}
+            {hasDonePath && `${step}/${pathSteps.length - 1}`}
           </div>
           <div className="canvasContainer">
             <MyCanvas
