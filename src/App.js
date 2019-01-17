@@ -1,5 +1,5 @@
 import produce from "immer"
-import React, { Component } from "react"
+import React, { Component, Fragment } from "react"
 import { createPathFinder, eucledianDistance } from "./algo/createPathFinder"
 import PriorityQueue from "./algo/queues/PriorityQueue"
 import "./App.css"
@@ -297,7 +297,7 @@ class App extends Component {
             This looks like : <strong>{algoName}</strong>
           </p>
           {hasDonePath && (
-            <fragment>
+            <Fragment>
               <strong> nodes in frontier: </strong>
               <table>
                 <thead>
@@ -308,14 +308,14 @@ class App extends Component {
                 </thead>
                 <tbody>
                   {pathState.frontier.items.map(({ id, cost }) => (
-                    <tr>
+                    <tr key={id}>
                       <td>{id}</td>
                       <td>{Math.round(cost)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </fragment>
+            </Fragment>
           )}
           {/* {hasDonePath && (
             <table>
