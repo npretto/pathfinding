@@ -40,7 +40,7 @@ export const createPathFinder = (queue, heuristic = (from, to) => 1) => (
           })
           cameFrom[next] = current.id
 
-          if (next === goal && path == null) {
+          if (next === goal /* && path == null*/) {
             path = [goal]
             let node = goal
             while (node != start) {

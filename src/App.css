@@ -69,3 +69,12 @@ div {
   background: lightgreen;
   width: 400px;
 }
+
+table,
+td,
+tr,
+th {
+  padding: 1px;
+  border: 1px solid gray;
+  border-collapse: collapse;
+}

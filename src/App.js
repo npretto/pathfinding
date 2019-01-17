@@ -4,7 +4,7 @@ import { createPathFinder, eucledianDistance } from "./algo/createPathFinder"
 import PriorityQueue from "./algo/queues/PriorityQueue"
 import "./App.css"
 import { dist } from "./math"
-import { newEntries } from "./utils"
+import { newEntries, entries } from "./utils"
 import MyCanvas from "./components/MyCanvas"
 import FIFO from "./algo/queues/FIFO"
 
@@ -23,7 +23,13 @@ class App extends Component {
     await this.generateNodes(8, 70)
     await this.generateLinks(100)
 
-    this.test()
+    this.setState(
+      {
+        robot: this.findClosestNode({ x: 100, y: 100 }),
+        goal: this.findClosestNode({ x: 500, y: 500 })
+      },
+      () => this.test()
+    )
   }
 
   generateNodes(size, dist) {
@@ -97,7 +103,7 @@ class App extends Component {
 
     const findPath = pf(this.state.nodes, this.state.links)
     this.setState({ pathSteps: [], step: 0, hasDonePath: false }, () => {
-      for (let pathStep of findPath(51, 0)) {
+      for (let pathStep of findPath(this.state.robot.id, this.state.goal.id)) {
         // console.log(pathStep)
         this.setState(
           produce(state => {
@@ -112,9 +118,39 @@ class App extends Component {
       }
     })
   }
+  // p: {x,y}
+  findClosestNode = p => {
+    let minD = 9999
+    let n = null
+
+    entries(this.state.nodes).forEach(([id, node]) => {
+      const d = dist(p, node)
+      if (d < minD) {
+        minD = d
+        n = { ...node, id }
+      }
+    })
+    return n
+  }
+
+  onRobotDrag = event => {
+    const { x, y } = event.target.attrs
+    const closest = this.findClosestNode({ x, y })
+    this.setState({ robot: { ...closest } }, () => this.test())
+  }
+
+  onGoalDrag = event => {
+    const { x, y } = event.target.attrs
+    const closest = this.findClosestNode({ x, y })
+    this.setState({ goal: { ...closest } }, () => this.test())
+  }
 
   render() {
     const { pathSteps, step, hasDonePath, heuristic, queue } = this.state
+
+    const pathState = hasDonePath ? pathSteps[step] : {}
+
+    if (hasDonePath) console.log(pathState)
 
     const algoName =
       queue === "fifo"
@@ -145,7 +181,11 @@ class App extends Component {
             {hasDonePath && `${step}/${pathSteps.length}`}
           </div>
           <div className="canvasContainer">
-            <MyCanvas {...this.state} />
+            <MyCanvas
+              {...this.state}
+              onRobotDrag={this.onRobotDrag}
+              onGoalDrag={this.onGoalDrag}
+            />
           </div>
         </div>
         <div className="optionsPanel">
@@ -186,6 +226,41 @@ class App extends Component {
           <p>
             This looks like : <strong>{algoName}</strong>
           </p>
+          {hasDonePath && (
+            <fragment>
+              <strong> nodes in frontier: </strong>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Node</th>
+                    <th>Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pathState.frontier.items.map(({ id, cost }) => (
+                    <tr>
+                      <td>{id}</td>
+                      <td>{Math.round(cost)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </fragment>
+          )}
+          {/* {hasDonePath && (
+            <table>
+              <tr>
+                <th>Node</th>
+                <th>Cost so far</th>
+              </tr>
+              {Object.entries(pathState.costsSoFar).map(([i, cost]) => (
+                <tr>
+                  <td>{i}</td>
+                  <td>{Math.round(cost / 10)}</td>
+                </tr>
+              ))}
+            </table>
+          )} */}
         </div>
       </div>
     )

@@ -2,11 +2,22 @@ import React, { Component } from "react"
 import { Arrow, Layer, Stage } from "react-konva"
 import Link from "../figures/Link"
 import Node from "../figures/Node"
+import Robot from "../figures/Robot"
+import Goal from "../figures/Goal"
+
 import { entries } from "../utils"
 
 export default class MyCanvas extends Component {
   render() {
-    const { nodes, links, pathSteps, step, hasDonePath } = this.props
+    const {
+      nodes,
+      links,
+      pathSteps,
+      step,
+      hasDonePath,
+      robot,
+      goal
+    } = this.props
 
     const pathState =
       hasDonePath && pathSteps.length > step ? pathSteps[step] : {}
@@ -75,6 +86,10 @@ export default class MyCanvas extends Component {
                 }
               />
             ))}
+        </Layer>
+        <Layer>
+          <Robot {...robot} onDragEnd={this.props.onRobotDrag} />
+          <Goal {...goal} onDragEnd={this.props.onGoalDrag} />
         </Layer>
       </Stage>
     )
