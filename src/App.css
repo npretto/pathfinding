@@ -72,6 +72,11 @@ div {
   width: 400px;
 }
 
+.side-thing {
+  display: inline-block;
+  width: 250px;
+}
+
 table,
 td,
 tr,

@@ -16,7 +16,9 @@ class App extends Component {
     step: 0,
     hasDonePath: false,
     queue: "fifo",
-    heuristic: "omogeneus"
+    heuristic: "omogeneus",
+    autoStep: 0,
+    stopOnPath: true
   }
 
   async componentDidMount() {
@@ -30,6 +32,26 @@ class App extends Component {
       },
       () => this.test()
     )
+
+    setTimeout(this.tick, 300)
+  }
+
+  tick = () => {
+    const autoStep = parseInt(this.state.autoStep)
+    if (
+      autoStep > 0 &&
+      this.state.step < this.state.pathSteps.length - 1 &&
+      (!this.state.stopOnPath ||
+        this.state.pathSteps[this.state.step].path === null)
+    ) {
+      console.log("autostep", autoStep)
+      this.setState(
+        produce(state => {
+          state.step++
+        })
+      )
+    }
+    setTimeout(this.tick, [1000, 1500, 800, 400, 200][autoStep])
   }
 
   generateNodes(size, dist) {
@@ -108,8 +130,8 @@ class App extends Component {
         this.setState(
           produce(state => {
             state.pathSteps.push(pathStep)
-            if (pathStep.path != null && state.step === 0)
-              state.step = state.pathSteps.length - 1
+            // if (pathStep.path != null && state.step === 0)
+            //   state.step = state.pathSteps.length - 1
           }),
           () => {
             this.setState({ hasDonePath: true })
@@ -146,7 +168,14 @@ class App extends Component {
   }
 
   render() {
-    const { pathSteps, step, hasDonePath, heuristic, queue } = this.state
+    const {
+      pathSteps,
+      step,
+      hasDonePath,
+      heuristic,
+      queue,
+      autoStep
+    } = this.state
 
     const pathState = hasDonePath ? pathSteps[step] : {}
 
@@ -164,7 +193,20 @@ class App extends Component {
         <div className="left">
           <div className="top">
             {/* <button onClick={this.test}> TEST </button> */}
-            <label>Step: </label>
+            <span className={"side-thing"}>
+              Step: {hasDonePath && `${step}/${pathSteps.length - 1}`}
+            </span>
+            <button
+              onClick={() =>
+                this.setState({
+                  step: pathSteps.findIndex(step => step.path)
+                })
+              }
+            >
+              Steps needed for first solution{" "}
+              {hasDonePath && pathSteps.findIndex(step => step.path)}
+            </button>
+            <br />
             {hasDonePath && (
               <input
                 style={{ width: "800px" }}
@@ -179,7 +221,34 @@ class App extends Component {
                 }}
               />
             )}
-            {hasDonePath && `${step}/${pathSteps.length - 1}`}
+            <br />
+            <span />
+            <label className={"side-thing"}>
+              AutoStep :
+              <input
+                style={{ width: "100px" }}
+                type="range"
+                min={0}
+                max={4}
+                value={autoStep}
+                step={1}
+                onInput={e => this.setState({ autoStep: e.target.value })}
+                onChange={e => {
+                  this.setState({ autoStep: e.target.value })
+                }}
+              />
+              {["off", "slow", "fast", "faster", "fastest"][autoStep]}
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={this.state.stopOnPath}
+                onChange={event =>
+                  this.setState({ stopOnPath: event.target.checked })
+                }
+              />
+              Stop on first path
+            </label>
           </div>
           <div className="canvasContainer">
             <MyCanvas
@@ -190,7 +259,7 @@ class App extends Component {
           </div>
         </div>
         <div className="optionsPanel">
-          options
+          <h1>options</h1>
           <br />
           <br />
           <label>

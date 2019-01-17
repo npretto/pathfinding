@@ -10,7 +10,7 @@ class Node extends Component {
           x={x}
           y={y}
           radius={10}
-          fill={inFrontier ? "yellow" : visited ? "red" : "blue"}
+          fill={inFrontier ? "yellow" : visited ? "red" : "grey"}
           shadowBlur={5}
         />
         <Text text={name} x={x - 5} y={y - 5} />
