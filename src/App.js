@@ -10,8 +10,11 @@ import FIFO from "./algo/queues/FIFO"
 
 class App extends Component {
   state = {
+    allNodes: newEntries(),
     nodes: newEntries(),
     links: newEntries(),
+    obstacle1: { x1: 150, x2: 288, y1: 60, y2: 473 },
+    obstacle2: { x1: 312, x2: 557, y1: 410, y2: 470 },
     pathSteps: null,
     step: 0,
     hasDonePath: false,
@@ -23,15 +26,17 @@ class App extends Component {
 
   async componentDidMount() {
     await this.generateNodes(8, 70)
-    await this.generateLinks(100)
+    // await this.generateLinks(100)
 
     this.setState(
       {
-        robot: this.findClosestNode({ x: 100, y: 100 }),
+        robot: this.findClosestNode({ x: 400, y: 100 }),
         goal: this.findClosestNode({ x: 500, y: 500 })
       },
       () => this.test()
     )
+
+    this.checkNodes()
 
     setTimeout(this.tick, 300)
   }
@@ -72,7 +77,7 @@ class App extends Component {
         }
       }
 
-      this.setState({ nodes }, () => resolve())
+      this.setState({ allNodes: nodes, nodes }, () => resolve())
     })
   }
 
@@ -92,13 +97,15 @@ class App extends Component {
       let index = 0
       for (let i = 0; i < nodes.allIds.length; i++) {
         for (let j = i + 1; j < nodes.allIds.length; j++) {
-          const a = nodes.byId[i]
-          const b = nodes.byId[j]
+          const ida = nodes.allIds[i]
+          const idb = nodes.allIds[j]
+          const a = nodes.byId[ida]
+          const b = nodes.byId[idb]
 
-          if (dist(a, b) < maxDist) {
-            nodes.byId[i].neighbors.push(j)
-            nodes.byId[j].neighbors.push(i)
-            addLink(index, { from: i, to: j })
+          if (a && b && dist(a, b) < maxDist) {
+            a.neighbors.push(idb)
+            b.neighbors.push(ida)
+            addLink(index, { from: ida, to: idb })
 
             index++
           }
@@ -107,6 +114,61 @@ class App extends Component {
 
       this.setState({ nodes, links }, () => resolve())
     })
+  }
+
+  checkNodes() {
+    this.setState({ pathSteps: null, step: 0, hasDonePath: false })
+
+    return new Promise((resolve, reject) => {
+      const newNodes = produce(this.state.allNodes, nodes => {
+        const { obstacle1: o1, obstacle2: o2 } = this.state
+        return entries(nodes).map(([id, node]) => {
+          let valid = true //not inside an obstacle
+
+          //safety buffer
+          const sb = 0
+          if (
+            (node.x > o1.x1 - sb &&
+              node.x < o1.x2 + sb &&
+              node.y > o1.y1 - sb &&
+              node.y < o1.y2 + sb) ||
+            (node.x > o2.x1 - sb &&
+              node.x < o2.x2 + sb &&
+              node.y > o2.y1 - sb &&
+              node.y < o2.y2 + sb)
+          ) {
+            valid = false
+          }
+          return [
+            id,
+            {
+              ...node,
+              valid
+            }
+          ]
+        })
+      })
+
+      const nodes = newNodes
+        .filter(([id, node]) => node.valid)
+        .reduce(
+          (acc, [id, node]) => ({
+            byId: { ...acc.byId, [id]: node },
+            allIds: [...acc.allIds, id]
+          }),
+          {
+            byId: {},
+            allIds: []
+          }
+        )
+
+      this.setState({ nodes, links: newEntries() }, async () => {
+        await this.generateLinks(100)
+        this.test()
+      })
+    })
+
+    //this.setState({ alllNodes: { ...this.state.nodes, byId: newNodes } })
   }
 
   test = () => {
@@ -255,6 +317,9 @@ class App extends Component {
               {...this.state}
               onRobotDrag={this.onRobotDrag}
               onGoalDrag={this.onGoalDrag}
+              onObstacleMove={name => positions =>
+                this.setState({ [name]: positions })}
+              onObstacleMoveEnd={() => this.checkNodes()}
             />
           </div>
         </div>

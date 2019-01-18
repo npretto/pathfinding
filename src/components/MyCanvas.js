@@ -6,6 +6,7 @@ import Robot from "../figures/Robot"
 import Goal from "../figures/Goal"
 
 import { entries } from "../utils"
+import Obstacle from "../figures/Obstacle"
 
 export default class MyCanvas extends Component {
   render() {
@@ -16,7 +17,11 @@ export default class MyCanvas extends Component {
       step,
       hasDonePath,
       robot,
-      goal
+      goal,
+      obstacle1,
+      obstacle2,
+      onObstacleMove, // pass first param as number/name of obstacle
+      onObstacleMoveEnd
     } = this.props
 
     const pathState =
@@ -69,6 +74,7 @@ export default class MyCanvas extends Component {
         <Layer>
           {nodes.allIds
             .map(id => [id, nodes.byId[id]])
+            .filter(([id, node]) => node.valid)
             .map(([i, n]) => (
               <Node
                 key={i}
@@ -86,6 +92,18 @@ export default class MyCanvas extends Component {
                 }
               />
             ))}
+        </Layer>
+        <Layer>
+          <Obstacle
+            {...obstacle1}
+            onMove={onObstacleMove("obstacle1")}
+            onMoveEnd={onObstacleMoveEnd}
+          />
+          <Obstacle
+            {...obstacle2}
+            onMove={onObstacleMove("obstacle2")}
+            onMoveEnd={onObstacleMoveEnd}
+          />
         </Layer>
         <Layer>
           <Robot {...robot} onDragEnd={this.props.onRobotDrag} />
