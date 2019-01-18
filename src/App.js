@@ -13,14 +13,14 @@ class App extends Component {
     allNodes: newEntries(),
     nodes: newEntries(),
     links: newEntries(),
-    obstacle1: { x1: 150, x2: 288, y1: 60, y2: 473 },
+    obstacle1: { x1: 150, x2: 288, y1: 90, y2: 473 },
     obstacle2: { x1: 312, x2: 557, y1: 410, y2: 470 },
     pathSteps: null,
     step: 0,
     hasDonePath: false,
     queue: "fifo",
     heuristic: "omogeneus",
-    autoStep: 0,
+    autoStep: 2,
     stopOnPath: true
   }
 

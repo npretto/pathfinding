@@ -31,12 +31,28 @@ export default class MyCanvas extends Component {
     if (hasDonePath) {
       console.log("current PathState.frontier.items", pathState.frontier.items)
     }
+
+    const lastPath = hasDonePath ? pathSteps[pathSteps.length - 1].path : []
+
+    console.log("LAST PATH", lastPath)
+
     return (
       <Stage width={800} height={800}>
         <Layer>
-          {entries(links).map(([i, l]) => (
-            <Link key={i} from={nodes.byId[l.from]} to={nodes.byId[l.to]} />
-          ))}
+          {entries(links).map(([i, l]) => {
+            const isInPathLasthPath =
+              lastPath != null &&
+              lastPath.includes(parseInt(l.from)) &&
+              lastPath.includes(parseInt(l.to))
+            return (
+              <Link
+                key={i}
+                from={nodes.byId[l.from]}
+                to={nodes.byId[l.to]}
+                isInPathLasthPath={isInPathLasthPath}
+              />
+            )
+          })}
         </Layer>
 
         <Layer>
