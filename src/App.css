@@ -1,5 +1,6 @@
 * {
   user-select: none;
+  box-sizing: border-box;
 }
 .App {
   text-align: center;
@@ -96,4 +97,50 @@ th {
   border: 1px solid black;
   border-collapse: collapse;
   text-align: center;
+}
+
+.index {
+  min-width: 200px;
+  background: #123456;
+  font-weight: bold;
+  padding: 0px;
+  margin: 0px;
+}
+
+.index > div {
+  padding: 5px 0px 0px 10px;
+  height: 50px;
+  vertical-align: middle;
+  border: 1px solid #123456;
+}
+
+.index > div:hover {
+  border: 1px solid gray;
+}
+
+.index > div.active {
+  border: 2px solid yellow;
+}
+
+.popup {
+  background: white;
+  position: absolute;
+  height: 90%;
+  width: 500px;
+  z-index: 999;
+  margin: auto;
+  left: 0;
+  right: 0;
+  border: 3px solid black;
+  padding: 10px;
+  box-shadow: 0px 0px 200px 20px gray;
+}
+
+.popup button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 100px;
+  height: 30px;
+  background: gray;
 }

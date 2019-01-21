@@ -11,6 +11,9 @@ import { dist } from "./math"
 import { newEntries, entries } from "./utils"
 import MyCanvas from "./components/MyCanvas"
 import FIFO from "./algo/queues/FIFO"
+import chapters from "./theory.js"
+import Index from "./components/Index"
+import PopUp from "./components/PopUp"
 
 const NODE_DISTANCE = 70
 
@@ -28,7 +31,9 @@ class App extends Component {
     heuristic: "nonAdmissable", //"omogeneus",
     autoStep: 2,
     k: 1,
-    stopOnPath: true
+    stopOnPath: true,
+    currentChapterIndex: 0,
+    isPopUpOpen: true
   }
 
   async componentDidMount() {
@@ -178,6 +183,7 @@ class App extends Component {
     //this.setState({ alllNodes: { ...this.state.nodes, byId: newNodes } })
   }
 
+  // apparently i like to name the main function of a program 'test' when i first try it
   test = () => {
     // const pf = createPathFinder(new FIFO()) //BFS
     // const pf = createPathFinder(new PriorityQueue(), () => 0) // djstra
@@ -241,6 +247,17 @@ class App extends Component {
     this.setState({ goal: { ...closest } }, () => this.test())
   }
 
+  setCurrentChapterIndex = index => {
+    this.setState(
+      {
+        ...chapters[index].state,
+        currentChapterIndex: index,
+        isPopUpOpen: true
+      },
+      () => this.test()
+    )
+  }
+
   render() {
     const {
       pathSteps,
@@ -248,7 +265,8 @@ class App extends Component {
       hasDonePath,
       heuristic,
       queue,
-      autoStep
+      autoStep,
+      currentChapterIndex
     } = this.state
 
     const pathState = hasDonePath ? pathSteps[step] : {}
@@ -264,6 +282,21 @@ class App extends Component {
 
     return (
       <div className="mainContainer">
+        {/* <div className="index"> */}
+        <Index
+          chapters={chapters}
+          currentChapterIndex={currentChapterIndex}
+          setCurrentChapterIndex={this.setCurrentChapterIndex}
+        />
+        {this.state.isPopUpOpen && (
+          <PopUp
+            open={true}
+            title={chapters[currentChapterIndex].title}
+            content={chapters[currentChapterIndex].content}
+            onClose={() => this.setState({ isPopUpOpen: false })}
+          />
+        )}
+        {/* </div> */}
         <div className="left">
           <div className="top">
             {/* <button onClick={this.test}> TEST </button> */}
