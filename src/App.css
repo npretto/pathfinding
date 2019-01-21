@@ -1,3 +1,6 @@
+* {
+  user-select: none;
+}
 .App {
   text-align: center;
 }
@@ -59,6 +62,10 @@ div {
   padding: 20px 5px 0px 5px;
 }
 
+.top button {
+  padding: 15px;
+}
+
 .canvasContainer {
   flex: 1;
   /* background: red; */
@@ -77,11 +84,16 @@ div {
   width: 250px;
 }
 
+table {
+  margin-top: 5px;
+  min-width: 100px;
+}
 table,
 td,
 tr,
 th {
-  padding: 1px;
-  border: 1px solid gray;
+  padding: 4px;
+  border: 1px solid black;
   border-collapse: collapse;
+  text-align: center;
 }

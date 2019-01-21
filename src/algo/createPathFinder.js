@@ -58,3 +58,6 @@ export const createPathFinder = (queue, heuristic = (from, to) => 1) => (
 }
 
 export const eucledianDistance = (from, to) => dist(from, to)
+
+export const nonAdmissable = k => (from, to) =>
+  (Math.abs(from.x - to.x) + Math.abs(from.y - to.y)) * k

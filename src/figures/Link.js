@@ -7,8 +7,8 @@ class Link extends Component {
     return (
       <Line
         points={[from.x, from.y, to.x, to.y]}
-        stroke={isInPathLasthPath ? "black" : "gray"}
-        strokeWidth={isInPathLasthPath ? 4 : 2}
+        stroke={isInPathLasthPath ? "#76ff00" : "gray"}
+        strokeWidth={isInPathLasthPath ? 5 : 2}
       />
     )
   }

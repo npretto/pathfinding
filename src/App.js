@@ -1,12 +1,18 @@
 import produce from "immer"
 import React, { Component, Fragment } from "react"
-import { createPathFinder, eucledianDistance } from "./algo/createPathFinder"
+import {
+  createPathFinder,
+  eucledianDistance,
+  nonAdmissable
+} from "./algo/createPathFinder"
 import PriorityQueue from "./algo/queues/PriorityQueue"
 import "./App.css"
 import { dist } from "./math"
 import { newEntries, entries } from "./utils"
 import MyCanvas from "./components/MyCanvas"
 import FIFO from "./algo/queues/FIFO"
+
+const NODE_DISTANCE = 70
 
 class App extends Component {
   state = {
@@ -18,14 +24,15 @@ class App extends Component {
     pathSteps: null,
     step: 0,
     hasDonePath: false,
-    queue: "fifo",
-    heuristic: "omogeneus",
+    queue: "priority", //"fifo",
+    heuristic: "nonAdmissable", //"omogeneus",
     autoStep: 2,
+    k: 1,
     stopOnPath: true
   }
 
   async componentDidMount() {
-    await this.generateNodes(8, 70)
+    await this.generateNodes(8, NODE_DISTANCE)
     // await this.generateLinks(100)
 
     this.setState(
@@ -56,7 +63,7 @@ class App extends Component {
         })
       )
     }
-    setTimeout(this.tick, [1000, 1500, 800, 400, 200][autoStep])
+    setTimeout(this.tick, [1500, 1000, 500, 200, 100][autoStep])
   }
 
   generateNodes(size, dist) {
@@ -177,8 +184,13 @@ class App extends Component {
     // const pf = createPathFinder(new PriorityQueue(), eucledianDistance) //a*
 
     const queue = this.state.queue === "fifo" ? new FIFO() : new PriorityQueue()
-    const heuristic =
-      this.state.heuristic === "omogeneus" ? () => 0 : eucledianDistance
+    const heuristic = {
+      omongeneus: () => 0,
+      euclidean: eucledianDistance,
+      nonAdmissable: nonAdmissable(this.state.k)
+    }[this.state.heuristic]
+
+    //this.state.heuristic === "omogeneus" ? () => 0 : eucledianDistance
 
     const pf = createPathFinder(queue, heuristic)
 
@@ -261,12 +273,30 @@ class App extends Component {
             <button
               onClick={() =>
                 this.setState({
+                  step: 0
+                })
+              }
+            >
+              «
+            </button>
+            <button
+              onClick={() =>
+                this.setState({
                   step: pathSteps.findIndex(step => step.path)
                 })
               }
             >
-              Steps needed for first solution{" "}
+              Steps needed for first solution
               {hasDonePath && pathSteps.findIndex(step => step.path)}
+            </button>
+            <button
+              onClick={() =>
+                this.setState({
+                  step: pathSteps.length - 1
+                })
+              }
+            >
+              »
             </button>
             <br />
             {hasDonePath && (
@@ -291,7 +321,7 @@ class App extends Component {
                 style={{ width: "100px" }}
                 type="range"
                 min={0}
-                max={4}
+                max={5}
                 value={autoStep}
                 step={1}
                 onInput={e => this.setState({ autoStep: e.target.value })}
@@ -299,7 +329,11 @@ class App extends Component {
                   this.setState({ autoStep: e.target.value })
                 }}
               />
-              {["off", "slow", "fast", "faster", "fastest"][autoStep]}
+              {
+                ["off", "slow", "fast", "faster", "fastest", "fastest³"][
+                  autoStep
+                ]
+              }
             </label>
             <label>
               <input
@@ -354,9 +388,31 @@ class App extends Component {
               }}
             >
               <option value="omogeneus">h(x) = k</option>
-              <option value="euclidean">Eucledian Distance</option>
+              <option value="euclidean">
+                Eucledian Distance h(x) = dist(goal,x)
+              </option>
+              <option value="nonAdmissable">h(x) = k * dist(goal,x)</option>
             </select>
           </label>
+          {this.state.heuristic === "nonAdmissable" && (
+            <label>
+              k = {this.state.k} <br /> {/*such html4 */}
+              <input
+                style={{ width: "100px" }}
+                type="range"
+                min={1}
+                max={10}
+                value={this.state.k}
+                step={1}
+                onInput={e =>
+                  this.setState({ k: e.target.value }, () => this.test())
+                }
+                onChange={e => {
+                  this.setState({ k: e.target.value }, () => this.test())
+                }}
+              />
+            </label>
+          )}
           <br />
           <p>
             This looks like : <strong>{algoName}</strong>
@@ -375,7 +431,7 @@ class App extends Component {
                   {pathState.frontier.items.map(({ id, cost }) => (
                     <tr key={id}>
                       <td>{id}</td>
-                      <td>{Math.round(cost)}</td>
+                      <td>{Math.round((cost / NODE_DISTANCE) * 10) / 10}</td>
                     </tr>
                   ))}
                 </tbody>
