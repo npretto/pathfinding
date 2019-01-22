@@ -39,7 +39,7 @@ Take a minute to explore the how the algorithm behaves.`,
   //   },
 
   {
-    title: "3.  Dijstra",
+    title: "3.  Dijkstra",
     content: `To fix the problems of BFS we can use a PriorityQueue instead of a FIFO.
   
   A priority queue needs a parameter to order the nodes in the frontier by, for Dijstra's algorithm the ordering is done by the function \`f(current, next) : costSoFar(current) + cost(current,next)\``,
