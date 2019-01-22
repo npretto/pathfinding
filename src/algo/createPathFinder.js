@@ -22,6 +22,16 @@ export const createPathFinder = (queue, heuristic = (from, to) => 1) => (
     while (!frontier.isEmpty()) {
       const current = frontier.getNext()
 
+      // if (current.id === goal /*&& path == null*/) {
+      //   path = [goal]
+      //   let node = goal
+      //   while (node != start) {
+      //     const prev = cameFrom[node]
+      //     path.push(prev)
+      //     node = prev
+      //   }
+      // }
+
       for (let next of nodes.byId[current.id].neighbors) {
         const cost =
           costsSoFar[current.id] +

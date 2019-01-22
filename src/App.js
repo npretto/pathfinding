@@ -29,7 +29,7 @@ class App extends Component {
     hasDonePath: false,
     queue: "priority", //"fifo",
     heuristic: "nonAdmissable", //"omogeneus",
-    autoStep: 2,
+    autoStep: 0,
     k: 1,
     stopOnPath: true,
     currentChapterIndex: 0,
@@ -59,7 +59,8 @@ class App extends Component {
       autoStep > 0 &&
       this.state.step < this.state.pathSteps.length - 1 &&
       (!this.state.stopOnPath ||
-        this.state.pathSteps[this.state.step].path === null)
+        this.state.pathSteps[this.state.step].path === null) &&
+      !this.state.isPopUpOpen
     ) {
       console.log("autostep", autoStep)
       this.setState(
@@ -177,6 +178,7 @@ class App extends Component {
       this.setState({ nodes, links: newEntries() }, async () => {
         await this.generateLinks(100)
         this.test()
+        resolve()
       })
     })
 
@@ -253,8 +255,23 @@ class App extends Component {
         ...chapters[index].state,
         currentChapterIndex: index,
         isPopUpOpen: true
+        // ...others
       },
-      () => this.test()
+      async () => {
+        await this.checkNodes()
+        const others = {}
+        if (chapters[index].robot !== undefined) {
+          const { x, y } = this.state.allNodes.byId[chapters[index].robot]
+          others.robot = this.findClosestNode({ x, y })
+        }
+
+        if (chapters[index].goal !== undefined) {
+          const { x, y } = this.state.allNodes.byId[chapters[index].goal]
+          others.goal = this.findClosestNode({ x, y })
+        }
+
+        this.setState(others, () => this.test())
+      }
     )
   }
 
@@ -279,6 +296,16 @@ class App extends Component {
         : heuristic === "omogeneus"
         ? "Dijkstra"
         : "A*"
+
+    const importantState = {
+      obstacle1: this.state.obstacle1,
+      obstacle2: this.state.obstacle2,
+      queue,
+      heuristic
+    }
+
+    console.log("STATE", importantState)
+    console.log("STATE JSON", JSON.stringify(importantState))
 
     return (
       <div className="mainContainer">
@@ -427,6 +454,7 @@ class App extends Component {
               <option value="nonAdmissable">h(x) = k * dist(goal,x)</option>
             </select>
           </label>
+          <br />
           {this.state.heuristic === "nonAdmissable" && (
             <label>
               k = {this.state.k} <br /> {/*such html4 */}
@@ -461,12 +489,13 @@ class App extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {pathState.frontier.items.map(({ id, cost }) => (
-                    <tr key={id}>
-                      <td>{id}</td>
-                      <td>{Math.round((cost / NODE_DISTANCE) * 10) / 10}</td>
-                    </tr>
-                  ))}
+                  {hasDonePath &&
+                    pathState.frontier.items.map(({ id, cost }) => (
+                      <tr key={id}>
+                        <td>{id}</td>
+                        <td>{Math.round((cost / NODE_DISTANCE) * 10) / 10}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </Fragment>
