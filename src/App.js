@@ -342,12 +342,30 @@ class App extends Component {
             <button
               onClick={() =>
                 this.setState({
+                  step: Math.max(this.state.step - 1, 0)
+                })
+              }
+            >
+              {"<"}
+            </button>
+            <button
+              onClick={() =>
+                this.setState({
                   step: pathSteps.findIndex(step => step.path)
                 })
               }
             >
               Steps needed for first solution
               {hasDonePath && pathSteps.findIndex(step => step.path)}
+            </button>
+            <button
+              onClick={() =>
+                this.setState({
+                  step: Math.min(this.state.step + 1, pathSteps.length - 1)
+                })
+              }
+            >
+              >
             </button>
             <button
               onClick={() =>
