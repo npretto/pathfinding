@@ -1,5 +1,6 @@
 import { cloneDeep } from "lodash"
 import { dist } from "../math"
+import { NODE_DISTANCE } from "../App"
 
 export const createPathFinder = (queue, heuristic = (from, to) => 1) => (
   nodes,
@@ -71,3 +72,5 @@ export const eucledianDistance = (from, to) => dist(from, to)
 
 export const nonAdmissable = k => (from, to) =>
   (Math.abs(from.x - to.x) + Math.abs(from.y - to.y)) * k
+
+export const random = () => Math.random() * 100 * NODE_DISTANCE

@@ -3,7 +3,8 @@ import React, { Component, Fragment } from "react"
 import {
   createPathFinder,
   eucledianDistance,
-  nonAdmissable
+  nonAdmissable,
+  random
 } from "./algo/createPathFinder"
 import PriorityQueue from "./algo/queues/PriorityQueue"
 import "./App.css"
@@ -15,7 +16,7 @@ import chapters from "./theory.js"
 import Index from "./components/Index"
 import PopUp from "./components/PopUp"
 
-const NODE_DISTANCE = 70
+export const NODE_DISTANCE = 70
 
 class App extends Component {
   state = {
@@ -195,7 +196,8 @@ class App extends Component {
     const heuristic = {
       omongeneus: () => 0,
       euclidean: eucledianDistance,
-      nonAdmissable: nonAdmissable(this.state.k)
+      nonAdmissable: nonAdmissable(this.state.k),
+      random: random
     }[this.state.heuristic]
 
     //this.state.heuristic === "omogeneus" ? () => 0 : eucledianDistance
@@ -470,6 +472,7 @@ class App extends Component {
                 Eucledian Distance h(x) = dist(goal,x)
               </option>
               <option value="nonAdmissable">h(x) = k * dist(goal,x)</option>
+              <option value="random"> random </option>
             </select>
           </label>
           <br />
