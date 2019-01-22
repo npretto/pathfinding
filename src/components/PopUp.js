@@ -9,7 +9,7 @@ export default class PopUp extends Component {
       <div className={["popup", open ? "open" : "closed"].join(" ")}>
         <h1> {title} </h1>
         <ReactMarkdown source={content} />
-        <button onClick={onClose}>Ok dude</button>
+        <button onClick={onClose}>Close</button>
       </div>
     )
   }
