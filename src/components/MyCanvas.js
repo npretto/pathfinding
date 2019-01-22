@@ -104,7 +104,8 @@ export default class MyCanvas extends Component {
                 }
                 visited={
                   hasDonePath && //Object.values(pathState.cameFrom).includes(i)
-                  (pathState.cameFrom[i] || pathState.cameFrom[i] === null)
+                  (pathState.cameFrom[i] !== undefined ||
+                    pathState.cameFrom[i] === null)
                 }
               />
             ))}
