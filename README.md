@@ -1,68 +1,69 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Interactive pathfinding
 
-## Available Scripts
+Breadth-first search, Dijkstra and A* are three famous path-planning algorithms that run on graphs. They can all be seen as a specialised version of a graph search with two different parameters, the queue used and the heuristic used. 
 
-In the project directory, you can run:
+The aim of this project is to explore and visualise how the different algorithms explore through the graph depending of the parameters chosen.
 
-### `npm start`
+The general algorithm works as follow:
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+A frontier is initialised as a queue containing the start node.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+While the frontier is not empty a node (called "current") is removed from the queue and gets "visited".
+Each of the neighbours of the visited node gets added to the frontier with a cost which is the current cost of getting to the current node plus the cost of visiting the neighbour from the current node plus the value of an heuristic function applied to the neighbour and the goal node.
+ The heuristic function is an estimation of the cost of the path from the two nodes.
 
-### `npm test`
+A reference of the direction of the visit is stored (usually in a cameFrom map) in order to be able to reconstruct the path when the algorithm stops.
+If the neighbour is already in the frontier its cost can be changed if the new path has a cheaper cost.
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The algorithm stops when it finds a path to the goal (early exit) or when the frontier is empty.
 
-### `npm run build`
+## BFS
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+BFS can be implemented by using a First-In-First-Out queue. This kind of queue ignores the cost of the links in the path and it expands based on the number of hops. Because of this it's guaranteed to find the shortest path in terms of hops, nut not in terms of costs associated with the hops.
+The heuristic used can be whatever we want, as it will be ignored by the queue.
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+The fifo has been implemented using an array, appending elements to the end and removing them from the start.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+![bfs animation](https://raw.githubusercontent.com/npretto/pathfinding/master/gif/bfs.gif)
 
-### `npm run eject`
+> Animation of BFS, notice how in a grid the frontier (yellow
+> nodes) expand as a square, because a square is the set of the nodes at the same  "hop-distance"
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Dijkstra
+By passing a PriorityQueue instead of a FIFO to the graph and a heuristic function which always returns 0 we get the Dijkstra algorithm.
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+The main difference from the BFS is that Dijkstra takes into account the costs, the algorithm can now find the actual shortest path considering costs of traveling from node to node.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The priority queue has been implemented with an array that get sorted after every insertion. While not being the most efficient implementation of a priority queue, it was easier to implement and is fast enough for this application.
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+![Dijkstra animation](https://raw.githubusercontent.com/npretto/pathfinding/master/gif/dijkstra.gif)
+> Animation of Dijkstra, notice how the frontier is now a circle.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
+## A*
+To obtain the A* algorithm from our generalised graph search we just need to pass an actual heuristic function, let's use the euclidean distance between the two nodes as example. By weighting the nodes based on "cost to the node" + "estimation of cost from node to goal" we can speed up the search by going first into nodes that look promising.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+![a* animation](https://raw.githubusercontent.com/npretto/pathfinding/master/gif/a-star.gif)
 
-### Analyzing the Bundle Size
+> Thanks to the heuristic, A* can find the correct path faster than Dijkstra or BFS
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+## Non admissible heuristics
 
-### Making a Progressive Web App
+A* is guaranteed to find the shortest path only if the heuristic is admissible, which means that it never overestimates the actual path length. The euclidean distance cannot overestimate, as the euclidean distance *is* the shortest distance/path between two points.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+But what if we multiply it by a constant *k > 0* ? By doing so it would overestimate making the heuristic non-admissible.
 
-### Advanced Configuration
+![non admissible heuristic animation](https://raw.githubusercontent.com/npretto/pathfinding/master/gif/heuristics.gif)
+>The more we increase the value of *k* the more the algorithm goes towards the goal. This also makes it less accurate, making the resulting path not always the shortest.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
 
-### Deployment
+## Implementation
+The project was implemented in javascript in order to be more accessible on the web. I used react for rendering the UI and react-konva for rendering the graph.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+The pathfinder is implemented as a function that accepts the queue type, the heuristic, and returns another function which is the actual pathfinder (this concept is known as currying).
 
-### `npm run build` fails to minify
+In this way every time the user changes the settings, a new pathfinder function is created with the correct parameters and can be used to navigate the graph.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+In order to show every step of the exploration, the function is a javascript generator, meaning that it returns an iterator and not just a single value. This allows me to yield the entire state of the algorithm at every step, save it into an array and then show a specific state based on the value of the slider at the top of the page.
