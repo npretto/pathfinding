@@ -1,56 +1,168 @@
 ﻿<!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive pathfinding</title>
+    <link rel="stylesheet" href="https://stackedit.io/style.css" />
+  </head>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome file</title>
-  <link rel="stylesheet" href="https://stackedit.io/style.css" />
-</head>
-
-<body class="stackedit">
-  <div class="stackedit__html"><h1 id="interactive-pathfinding">Interactive pathfinding</h1>
-<p>Breadth-first search, Dijkstra and A* are three famous path-planning algorithms that run on graph. They can all be seen as a specialised version of a graph search with two different parameters, the queue used and the heuristic used.</p>
-<p>The aim of this project is to explore and visualise how the different algorithms explore through the graph depending of the parameters chosen.</p>
-<p>The general algorithm works as follow:</p>
-<p>A frontier is initialised as a queue containing the start node.</p>
-<p>While the frontier is not empty a node (current) is removed from the queue and gets “visited”.<br>
-Each of the neighbours of the visited node gets added to the frontier with a cost which is the current cost of getting to the current node plus the cost of visiting the neighbour from the current node plus the value of an heuristic function applied to the neighbour and the goal node.<br>
-The heuristic function is an estimation of the cost of the path from the two nodes.</p>
-<p>A reference of the direction of the visit is stored (usually in a cameFrom map) in order to be able to reconstruct the path when the algorithm stops.<br>
-If the neighbour is already in the frontier its cost can be changed if the new path has a cheaper cost.</p>
-<p>The algorithm stops when it finds a path to the goal (early exit) or when the frontier is empty.</p>
-<h2 id="bfs">BFS</h2>
-<p>BFS can be implemented by using a First-In-First-Out queue. This kind of queue ignores the cost of the links in the path and it expands based on the number of hops. Because of this it’s guaranteed to find the shortest path in terms of hops, nut not in terms of costs associated with the hops.<br>
-The heuristic used can be whatever we want, as it will be ignored by the queue.</p>
-<p>The fifo has been implemented using an array, appending elements to the end and removing them from the start.</p>
-<iframe src="https://giphy.com/embed/5z2e9JCSSW1TXcdxvN" width="100%" height="400pxi " class="giphy-embed" allowfullscreen=""></iframe>
-<blockquote>
-<p>Animation of BFS, notice how in a grid the frontier (yellow<br>
-nodes) expand as a square, because a square is the set of the nodes at the same  “hop-distance”</p>
-</blockquote>
-<h2 id="dijkstra">Dijkstra</h2>
-<p>By passing a PriorityQueue instead of a FIFO to the graph and a heuristic function which always returns 0 we get the Dijkstra algorithm.</p>
-<p>The main difference from the BFS is that Dijkstra takes into account the costs, the algorithm can now find the actual shortest path considering costs of traveling from node to node.</p>
-<p>The priority queue has been implemented with an array that get sorted after every insertion. While not being the most efficient implementation of a priority queue, it was easier to implement and is fast enough for this application.</p>
-<iframe src="https://giphy.com/embed/RJwAw9i55SvCzZug2j" width="100%" height="460" class="giphy-embed" allowfullscreen=""></iframe>
-<blockquote>
-<p>Animation of Dijkstra, notice how the frontier is now a circle.</p>
-</blockquote>
-<h2 id="a">A*</h2>
-<p>To obtain the A* algorithm from our generalised graph search we just need to pass an actual heuristic function, let’s use the euclidean distance between the two nodes as example. By weighting the nodes based by “cost to the node” + “estimation of cost from node to goal” wen can speed up the search by going first into nodes that look promising.</p>
-<iframe src="https://giphy.com/embed/j0NBE7bXnVn0r1NHR6" width="100%" height="452" class="giphy-embed" allowfullscreen=""></iframe>
-<blockquote>
-<p>Thanks to the heuristic, A* can find the correct path faster than Dijkstra or BFS</p>
-</blockquote>
-<h2 id="non-admissible-heuristics">Non admissible heuristics</h2>
-<p>A* is guaranteed to find the shortest path only if the heuristic is admissible, which means that it never overestimates the actual path length. The euclidean distance cannot overestimate, as the euclidean distance <em>is</em> the shortest distance/path between two points.</p>
-<p>But what if we multiply it by a constant <em>k &gt; 0</em>, by doing so it would overestimate making the heuristic non-admissible.</p>
-<iframe src="https://giphy.com/embed/1PgFccMcjmubToBoHX" width="100%" height="480" class="giphy-embed" allowfullscreen=""></iframe>
-<blockquote>
-<p>The more we increase the value of <em>k</em> the more the algorithm goes towards the goal. This also makes it less accurate, making the resulting path not always the shortest.</p>
-</blockquote>
-</div>
-</body>
-
+  <body class="stackedit">
+    <div class="stackedit__html">
+      <h1 id="interactive-pathfinding">Interactive pathfinding</h1>
+      <p>
+        Breadth-first search, Dijkstra and A* are three famous path-planning
+        algorithms that run on graphs. They can all be seen as a specialised
+        version of a graph search with two different parameters, the queue used
+        and the heuristic used.
+      </p>
+      <p>
+        The aim of this project is to explore and visualise how the different
+        algorithms explore through the graph depending of the parameters chosen.
+      </p>
+      <p>The general algorithm works as follow:</p>
+      <p>A frontier is initialised as a queue containing the start node.</p>
+      <p>
+        While the frontier is not empty a node (called “current”) is removed
+        from the queue and gets “visited”.<br />
+        Each of the neighbours of the visited node gets added to the frontier
+        with a cost which is the current cost of getting to the current node
+        plus the cost of visiting the neighbour from the current node plus the
+        value of an heuristic function applied to the neighbour and the goal
+        node.<br />
+        The heuristic function is an estimation of the cost of the path from the
+        two nodes.
+      </p>
+      <p>
+        A reference of the direction of the visit is stored (usually in a
+        cameFrom map) in order to be able to reconstruct the path when the
+        algorithm stops.<br />
+        If the neighbour is already in the frontier its cost can be changed if
+        the new path has a cheaper cost.
+      </p>
+      <p>
+        The algorithm stops when it finds a path to the goal (early exit) or
+        when the frontier is empty.
+      </p>
+      <h2 id="bfs">BFS</h2>
+      <p>
+        BFS can be implemented by using a First-In-First-Out queue. This kind of
+        queue ignores the cost of the links in the path and it expands based on
+        the number of hops. Because of this it’s guaranteed to find the shortest
+        path in terms of hops, nut not in terms of costs associated with the
+        hops.<br />
+        The heuristic used can be whatever we want, as it will be ignored by the
+        queue.
+      </p>
+      <p>
+        The fifo has been implemented using an array, appending elements to the
+        end and removing them from the start.
+      </p>
+      <p>
+        <img
+          src="https://raw.githubusercontent.com/npretto/pathfinding/master/gif/bfs.gif"
+          alt="bfs animation"
+        />
+      </p>
+      <blockquote>
+        <p>
+          Animation of BFS, notice how in a grid the frontier (yellow<br />
+          nodes) expand as a square, because a square is the set of the nodes at
+          the same “hop-distance”
+        </p>
+      </blockquote>
+      <h2 id="dijkstra">Dijkstra</h2>
+      <p>
+        By passing a PriorityQueue instead of a FIFO to the graph and a
+        heuristic function which always returns 0 we get the Dijkstra algorithm.
+      </p>
+      <p>
+        The main difference from the BFS is that Dijkstra takes into account the
+        costs, the algorithm can now find the actual shortest path considering
+        costs of traveling from node to node.
+      </p>
+      <p>
+        The priority queue has been implemented with an array that get sorted
+        after every insertion. While not being the most efficient implementation
+        of a priority queue, it was easier to implement and is fast enough for
+        this application.
+      </p>
+      <p>
+        <img
+          src="https://raw.githubusercontent.com/npretto/pathfinding/master/gif/dijkstra.gif"
+          alt="Dijkstra animation"
+        />
+      </p>
+      <blockquote>
+        <p>Animation of Dijkstra, notice how the frontier is now a circle.</p>
+      </blockquote>
+      <h2 id="a">A*</h2>
+      <p>
+        To obtain the A* algorithm from our generalised graph search we just
+        need to pass an actual heuristic function, let’s use the euclidean
+        distance between the two nodes as example. By weighting the nodes based
+        on “cost to the node” + “estimation of cost from node to goal” we can
+        speed up the search by going first into nodes that look promising.
+      </p>
+      <p>
+        <img
+          src="https://raw.githubusercontent.com/npretto/pathfinding/master/gif/a-star.gif"
+          alt="a* animation"
+        />
+      </p>
+      <blockquote>
+        <p>
+          Thanks to the heuristic, A* can find the correct path faster than
+          Dijkstra or BFS
+        </p>
+      </blockquote>
+      <h2 id="non-admissible-heuristics">Non admissible heuristics</h2>
+      <p>
+        A* is guaranteed to find the shortest path only if the heuristic is
+        admissible, which means that it never overestimates the actual path
+        length. The euclidean distance cannot overestimate, as the euclidean
+        distance <em>is</em> the shortest distance/path between two points.
+      </p>
+      <p>
+        But what if we multiply it by a constant <em>k &gt; 0</em> ? By doing so
+        it would overestimate making the heuristic non-admissible.
+      </p>
+      <p>
+        <img
+          src="https://raw.githubusercontent.com/npretto/pathfinding/master/gif/heuristics.gif"
+          alt="non admissible heuristic animation"
+        />
+      </p>
+      <blockquote>
+        <p>
+          The more we increase the value of <em>k</em> the more the algorithm
+          goes towards the goal. This also makes it less accurate, making the
+          resulting path not always the shortest.
+        </p>
+      </blockquote>
+      <h2 id="implementation">Implementation</h2>
+      <p>
+        The project was implemented in javascript in order to be more accessible
+        on the web. I used react for rendering the UI and react-konva for
+        rendering the graph.
+      </p>
+      <p>
+        The pathfinder is implemented as a function that accepts the queue type,
+        the heuristic, and returns another function which is the actual
+        pathfinder (this concept is known as currying).
+      </p>
+      <p>
+        In this way every time the user changes the settings, a new pathfinder
+        function is created with the correct parameters and can be used to
+        navigate the graph.
+      </p>
+      <p>
+        In order to show every step of the exploration, the function is a
+        javascript generator, meaning that it returns an iterator and not just a
+        single value. This allows me to yield the entire state of the algorithm
+        at every step, save it into an array and then show a specific state
+        based on the value of the slider at the top of the page.
+      </p>
+    </div>
+  </body>
 </html>
