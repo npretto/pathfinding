@@ -21,7 +21,7 @@ The algorithm stops when it finds a path to the goal (early exit) or when the fr
 
 ## BFS
 
-BFS can be implemented by using a First-In-First-Out queue. This kind of queue ignores the cost of the links in the path and it expands based on the number of hops. Because of this it's guaranteed to find the shortest path in terms of hops, nut not in terms of costs associated with the hops.
+BFS can be implemented by using a First-In-First-Out queue. This kind of queue ignores the cost of the links in the path and it expands based on the number of hops. Because of this it's guaranteed to find the shortest path in terms of hops, but not in terms of costs associated with the hops.
 The heuristic used can be whatever we want, as it will be ignored by the queue.
 
 The fifo has been implemented using an array, appending elements to the end and removing them from the start.
@@ -29,7 +29,7 @@ The fifo has been implemented using an array, appending elements to the end and 
 ![bfs animation](https://raw.githubusercontent.com/npretto/pathfinding/master/gif/bfs.gif)
 
 > Animation of BFS, notice how in a grid the frontier (yellow
-> nodes) expand as a square, because a square is the set of the nodes at the same  "hop-distance"
+> nodes) expands as a square, because a square is the set of the nodes at the same  "hop-distance"
 
 
 ## Dijkstra
