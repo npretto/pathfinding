@@ -1,5 +1,7 @@
 # Interactive pathfinding
 
+Link to hosted demo: https://interactive-pathfinding.netlify.com/
+
 Breadth-first search, Dijkstra and A* are three famous path-planning algorithms that run on graphs. They can all be seen as a specialised version of a graph search with two different parameters, the queue used and the heuristic used. 
 
 The aim of this project is to explore and visualise how the different algorithms explore through the graph depending of the parameters chosen.
