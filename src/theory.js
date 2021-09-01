@@ -2,7 +2,7 @@ const chapters = [
   {
     title: "1.  INTRODUCTION",
     content: `
-The aim of this interactive lesson is to explain how BSD, Dijkstra and A* can be seen as the same generalized graph algorithm with different parameters.
+The aim of this interactive lesson is to explain how BFS, Dijkstra and A* can be seen as the same generalized graph algorithm with different parameters.
 
 The general algorithm explores the graph by adding nodes in a frontier and visiting them in a certain order.
 
